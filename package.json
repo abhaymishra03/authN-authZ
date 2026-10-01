@@ -1,0 +1,17 @@
+{
+  "name": "authn-authz",
+  "version": "1.0.0",
+  "description": "\"authN and authZ\"",
+  "license": "ISC",
+  "author": "Abhay Mishra",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.3"
+  }
+}
