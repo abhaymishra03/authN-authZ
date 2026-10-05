@@ -15,6 +15,9 @@ exports.register = async (req, res) => {
         .json({ message: "Password must be at least 8 characters" });
     }
 
+    console.log(name,email);
+    
+
     // Duplicate check
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
