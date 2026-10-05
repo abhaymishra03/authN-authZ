@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { signToken } = require("../utils/token");
 
 exports.register = async (req, res) => {
   try {
@@ -69,15 +70,18 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: invalidMsg });
     }
 
-    res.status(200).json({
-      message: "Login successful",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
+   const token = signToken(user);
+
+res.status(200).json({
+  message: "Login successful",
+  token,
+  user: {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  },
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
