@@ -88,3 +88,13 @@ res.status(200).json({
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.getMe = (req, res) => {
+  res.status(200).json({
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+    },
+  });
+};
