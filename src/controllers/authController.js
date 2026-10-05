@@ -45,3 +45,40 @@ exports.register = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // password has select:false in the schema, so we must ask for it explicitly
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+
+    // Same message whether the email or the password is wrong
+    const invalidMsg = "Invalid email or password";
+
+    if (!user) {
+      return res.status(401).json({ message: invalidMsg });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: invalidMsg });
+    }
+
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
