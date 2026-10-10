@@ -2,6 +2,9 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET_KEY } = require("../config/config");
+
+
+
 const register = async (req,res) => {
 
     const {username,email,password}=req.body;
@@ -16,9 +19,8 @@ const register = async (req,res) => {
     });
 
     if(isAlreadyRegistered){
-
         //409 ->conflict
-        res.status(409).json({
+        return res.status(409).json({
             message:"username or email already register",
         });
     }
@@ -33,21 +35,33 @@ const register = async (req,res) => {
         password:hash,
     });
 
-    const token = jwt.sign({
+    const accessToken = jwt.sign({
         id:user._id
     },JWT_SECRET_KEY,{
-        expiresIn:"1d",
+        expiresIn:"15m",
     });
+    const refreshToken = jwt.sign({
+        id:user._id
+    },JWT_SECRET_KEY,{
+        expiresIn:"7d",
+    });
+
 
 
     // 201->resource created 
 
-    res.cookie("token",token);
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly:true,
+        secure:process.env.NODE_ENV === "production",
+        sameSite:"strict",
+        maxAge:7*24*60*60*1000, //7 days
+    });
     res.status(201).json({
         message:"user registered successfully",
         user:{
             username:user.username,
             email:user.email,
+            accessToken,
         }
     });
 
@@ -95,7 +109,34 @@ const token =req.headers.authorization.split(" ")[1];
         })
     }
 }
+
+const refreshToken = async (req,res) => {
+
+    const refreshToken = req.cookies?.refreshToken;
+
+    if(!refreshToken){ 
+        return res.status(401).json({
+            message:"refresh token not found",
+        });
+    }   
+    const decoded = jwt.verify(refreshToken,JWT_SECRET_KEY);
+
+    let id = decoded.id;
+    
+    const accessToken = jwt.sign({
+        id:id
+    },JWT_SECRET_KEY,{
+        expiresIn:"15m",
+    });
+
+    return res.status(200).json({
+        message:"access token generated successfully",
+        accessToken,
+    });
+}
+
 module.exports={
     register,
     getMe,
+    refreshToken,
 };
