@@ -128,6 +128,20 @@ const refreshToken = async (req,res) => {
     },JWT_SECRET_KEY,{
         expiresIn:"15m",
     });
+    const newRefreshToken = jwt.sign({
+        id:id
+    },JWT_SECRET_KEY,{
+        expiresIn:"7d", 
+    });
+
+
+    res.cookie("refreshToken", newRefreshToken, {
+        httpOnly:true,
+        secure:process.env.NODE_ENV === "production",
+        sameSite:"strict",
+        maxAge:7*24*60*60*1000, //7 days
+    });
+
 
     return res.status(200).json({
         message:"access token generated successfully",
